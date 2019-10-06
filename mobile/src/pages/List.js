@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import socketio from 'socket.io-client';
 import {
+  Alert,
   AsyncStorage,
   StyleSheet,
   Platform,
@@ -14,6 +16,22 @@ import logo from '../../assets/logo.png';
 
 export default function List() {
   const [techs, setTechs] = useState([]);
+
+  useEffect(() => {
+    AsyncStorage.getItem('@aircnc_user').then(user_id => {
+      const socket = socketio('http://192.168.1.104:3333', {
+        query: { user_id }
+      });
+
+      socket.on('booking_response', booking => {
+        Alert.alert(
+          `Sua reserva em ${booking.spot.company} em ${booking.date} foi ${
+            booking.approved ? 'APROVADA' : 'REJEITADA'
+          }`
+        );
+      });
+    });
+  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem('@aircnc_techs').then(storageTechs => {
